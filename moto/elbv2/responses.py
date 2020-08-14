@@ -690,7 +690,7 @@ CREATE_LOAD_BALANCER_TEMPLATE = """<CreateLoadBalancerResponse xmlns="http://ela
         <LoadBalancerName>{{ load_balancer.name }}</LoadBalancerName>
         <VpcId>{{ load_balancer.vpc_id }}</VpcId>
         <CanonicalHostedZoneId>Z2P70J7EXAMPLE</CanonicalHostedZoneId>
-        <CreatedTime>{{ load_balancer.created_time }}</CreatedTime>
+        <CreatedTime>{{ load_balancer.created_time.isoformat() }}</CreatedTime>
         <AvailabilityZones>
           {% for subnet in load_balancer.subnets %}
           <member>
@@ -861,7 +861,7 @@ DESCRIBE_LOAD_BALANCERS_TEMPLATE = """<DescribeLoadBalancersResponse xmlns="http
         <LoadBalancerName>{{ load_balancer.name }}</LoadBalancerName>
         <VpcId>{{ load_balancer.vpc_id }}</VpcId>
         <CanonicalHostedZoneId>Z2P70J7EXAMPLE</CanonicalHostedZoneId>
-        <CreatedTime>{{ load_balancer.created_time }}</CreatedTime>
+        <CreatedTime>{{ load_balancer.created_time.isoformat() }}</CreatedTime>
         <AvailabilityZones>
           {% for subnet in load_balancer.subnets %}
           <member>

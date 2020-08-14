@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 import datetime
+import pytz
 import re
 from jinja2 import Template
 from botocore.exceptions import ParamValidationError
@@ -381,7 +382,7 @@ class FakeLoadBalancer(CloudFormationModel):
         scheme="internet-facing",
     ):
         self.name = name
-        self.created_time = datetime.datetime.now()
+        self.created_time = datetime.datetime.now(pytz.utc)
         self.scheme = scheme
         self.security_groups = security_groups
         self.subnets = subnets or []
