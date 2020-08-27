@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-import pdb
 import datetime
 import pytz
 import re
@@ -235,7 +234,6 @@ class FakeListener(CloudFormationModel):
 
     def register(self, rule):
         self._non_default_rules.append(rule)
-        pdb.set_trace()
         self._non_default_rules = sorted(self._non_default_rules, key=lambda x: x.priority)
 
     @staticmethod
