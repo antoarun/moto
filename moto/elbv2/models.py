@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+import pdb
 import datetime
 import pytz
 import re
@@ -216,7 +217,7 @@ class FakeListener(CloudFormationModel):
         self._default_rule = FakeRule(
             listener_arn=self.arn,
             conditions=[],
-            priority="default",
+            priority="0",
             actions=default_actions,
             is_default=True,
         )
@@ -234,9 +235,8 @@ class FakeListener(CloudFormationModel):
 
     def register(self, rule):
         self._non_default_rules.append(rule)
-        self._non_default_rules = sorted(
-            self._non_default_rules, key=lambda x: x.priority
-        )
+        pdb.set_trace()
+        self._non_default_rules = sorted(self._non_default_rules, key=lambda x: x.priority)
 
     @staticmethod
     def cloudformation_name_type():
@@ -826,9 +826,10 @@ Member must satisfy regular expression pattern: {}".format(
         for load_balancer in self.load_balancers.values():
             for listener_arn in listener_arns:
                 listener = load_balancer.listeners.get(listener_arn)
-                if not listener:
-                    raise ListenerNotFoundError()
-                matched.append(listener)
+                if listener:
+                    matched.append(listener)
+        if not matched:
+            raise ListenerNotFoundError()
         return matched
 
     def delete_load_balancer(self, arn):
