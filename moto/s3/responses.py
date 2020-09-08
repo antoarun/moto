@@ -1055,6 +1055,25 @@ class ResponseObject(_TemplateEnvironmentMixin, ActionAuthenticatorMixin):
             "Method {0} has not been implemented in the S3 backend yet".format(action)
         )
 
+    
+    def _strip_chunk_sign(self, body):
+        return re.sub(b'(^|\r\n)[0-9a-fA-F]+;chunk-signature=[0-9a-f]{64}(\r\n)(\r\n$)?', b'', body, flags=re.MULTILINE | re.DOTALL)
+
+    def _process_request_body(self, request):
+        if hasattr(request, "body"):
+            # Boto
+            body = request.body
+            if hasattr(body, "read"):
+                body = body.read()
+        else:
+            # Flask server
+            body = request.data
+        if "x-amz-content-sha256" in request.headers:
+            if request.headers.get("x-amz-content-sha256") == "STREAMING-AWS4-HMAC-SHA256-PAYLOAD":
+                modified_body = self._strip_chunk_sign(body)
+                body = modified_body
+        return body
+
     def _key_response(self, request, full_url, headers):
         parsed_url = urlparse(full_url)
         query = parse_qs(parsed_url.query, keep_blank_values=True)
@@ -1083,15 +1102,7 @@ class ResponseObject(_TemplateEnvironmentMixin, ActionAuthenticatorMixin):
                 # coming in from requests.get(s3.generate_presigned_url())
                 if self._invalid_headers(request.url, dict(request.headers)):
                     return 403, {}, S3_INVALID_PRESIGNED_PARAMETERS
-
-        if hasattr(request, "body"):
-            # Boto
-            body = request.body
-            if hasattr(body, "read"):
-                body = body.read()
-        else:
-            # Flask server
-            body = request.data
+        body = self._process_request_body(request)
         if body is None:
             body = b""
 
@@ -1162,7 +1173,6 @@ class ResponseObject(_TemplateEnvironmentMixin, ActionAuthenticatorMixin):
     def _key_response_put(self, request, body, bucket_name, query, key_name, headers):
         self._set_action("KEY", "PUT", query)
         self._authenticate_and_authorize_s3_action()
-
         response_headers = {}
         if query.get("uploadId") and query.get("partNumber"):
             upload_id = query["uploadId"][0]
